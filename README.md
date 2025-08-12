@@ -7,9 +7,9 @@ It uses **Speech Recognition**, **Text-to-Speech (TTS)**, and API integrations f
 
 ## 📸 Screenshot
 <p align="center">
-  <img src="<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/b82d3959-a18f-4f6d-9ef2-bafe083c72a0" />
-" alt="Jarvis Voice Assistant Screenshot" width="700">
+  <img src="screenshot.png" alt="Jarvis Voice Assistant Screenshot" width="700">
 </p>
+
 
 ---
 

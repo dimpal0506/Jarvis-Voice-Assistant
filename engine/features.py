@@ -16,7 +16,12 @@ from engine.config import ASSISTANT_NAME
 import pywhatkit as kit
 import pvporcupine
 import pygame
+import os
+import webbrowser
 
+import google.generativeai as genai
+
+genai.configure(api_key="AIzaSyC1rncWI8tC5If86WxKz9lmWKUbJGHH_Eg")
 
 from engine.helper import extract_yt_term, remove_words
 from hugchat import hugchat
@@ -27,50 +32,49 @@ cursor = con.cursor()
 @eel.expose
 
 def playAssistantSound():
-    music_dir = "www/assets/audio/start_sound.mp3"
+    music_path = os.path.abspath("www/assets/audio/start_sound.mp3")
     pygame.mixer.init()
-    pygame.mixer.music.load(music_dir)
+    pygame.mixer.music.load(music_path)
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
-        continue
+        pygame.time.Clock().tick(10)
+
+
 
     
 def openCommand(query):
-    query = query.replace(ASSISTANT_NAME, "")
-    query = query.replace("open", "")
-    query.lower()
+    try:
+        # Normalize query
+        app = query.lower().replace("open ", "").strip()
 
-    app_name = query.strip()
+        # ✅ Handle known websites separately
+        if "youtube" in app:
+            speak("Opening YouTube")
+            webbrowser.open("https://www.youtube.com")
+        elif "google" in app:
+            speak("Opening Google")
+            webbrowser.open("https://www.google.com")
+        elif "instagram" in app:
+            speak("Opening Instagram")
+            webbrowser.open("https://www.instagram.com")
+        elif "facebook" in app:
+            speak("Opening Facebook")
+            webbrowser.open("https://www.facebook.com")
+        elif "linkedin" in app:
+            speak("Opening LinkedIn")
+            webbrowser.open("https://www.linkedin.com")
+        elif "twitter" in app or "x " in app:
+            speak("Opening Twitter")
+            webbrowser.open("https://www.twitter.com")
 
-    if app_name != "":
+        # ✅ For everything else, try to open as an application (your old behavior)
+        else:
+            speak(f"Opening {app}")
+            os.startfile(app)
 
-        try:
-            cursor.execute(
-                'SELECT path FROM sys_command WHERE name IN (?)', (app_name,))
-            results = cursor.fetchall()
-
-            if len(results) != 0:
-                speak("Opening "+query)
-                os.startfile(results[0][0])
-
-            elif len(results) == 0: 
-                cursor.execute(
-                'SELECT url FROM web_command WHERE name IN (?)', (app_name,))
-                results = cursor.fetchall()
-                
-                if len(results) != 0:
-                    speak("Opening "+query)
-                    webbrowser.open(results[0][0])
-
-                else:
-                    speak("Opening "+query)
-                    try:
-                        os.system('start '+query)
-                    except:
-                        speak("not found")
-        except:
-            speak("some thing went wrong")
-
+    except Exception as e:
+        print(f"[DEBUG] openCommand error: {e}")
+        speak("Sorry, I was unable to open it")
        
 
 def PlayYoutube(query):
@@ -182,14 +186,31 @@ def whatsApp(mobile_no, message, flag, name):
 
 # chat bot 
 def chatBot(query):
-    user_input = query.lower()
-    chatbot = hugchat.ChatBot(cookie_path="engine\cookies.json")
-    id = chatbot.new_conversation()
-    chatbot.change_conversation(id)
-    response =  chatbot.chat(user_input)
-    print(response)
-    speak(response)
-    return response
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(query)
+        text = response.text
+
+        if not text.strip():
+            raise Exception("Empty response from Gemini")
+
+        print(text)
+        speak(text)
+        return text
+    except Exception as e:
+        print(f"[DEBUG] ChatBot error (Gemini): {e}")
+        import wikipedia
+        try:
+            wiki_summary = wikipedia.summary(query, sentences=2)
+            print(wiki_summary)
+            speak(wiki_summary)
+            return wiki_summary
+        except:
+            fallback = "Sorry, I could not process that."
+            speak(fallback)
+            return fallback
+
+
 
 # android automation
 

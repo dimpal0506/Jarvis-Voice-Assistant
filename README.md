@@ -36,9 +36,3 @@ It uses **Speech Recognition**, **Text-to-Speech (TTS)**, and API integrations f
 - OpenAI API
 
 ---
-
-## 🚀 Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/dimpal0506/Jarvis-Voice-Assistant.git
-   cd Jarvis-Voice-Assistant

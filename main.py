@@ -13,7 +13,7 @@ def start():
 
     @eel.expose
     def init():
-        subprocess.call(["adb", "connect", "192.168.0.106:5555"])
+        subprocess.call(["adb", "connect", "Mobile_IPAddress"])
         eel.hideLoader()
         speak("Ready for Face Authentication")
         flag = recoganize.AuthenticateFace()
